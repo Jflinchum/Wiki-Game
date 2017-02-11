@@ -22,16 +22,23 @@ const getLinks = (body) => {
 const getGoal = (url, distance, history, cb) => {
   request(url, (error, response, body) => {
     if (!error && response.statusCode === 200) {
-      const title = getTitle(body);
-      const links = getLinks(body);
-      const nextLink = links[Math.floor(Math.random() * (links.length + 1))];
-      const regex = /\/wiki\/.+?(?=")/;
-      const nextWikiLink = `https://en.wikipedia.org${regex.exec(nextLink)}`;
-      history.push({title, link: (response.request.uri.href)});
-      if (distance <= 0) {
-        return cb({title, link: (response.request.uri.href)}, history);
-      } else {
-        return getGoal(nextWikiLink, distance - 1, history, cb);
+      const tempHistory = history;
+      try {
+        const title = getTitle(body);
+        const links = getLinks(body);
+        const nextLink = links[Math.floor(Math.random() * (links.length + 1))];
+        const regex = /\/wiki\/.+?(?=")/;
+        const nextWikiLink = `https://en.wikipedia.org${regex.exec(nextLink)}`;
+        history.push({title, link: (response.request.uri.href)});
+        if (distance <= 0) {
+          return cb({title, link: (response.request.uri.href)}, history);
+        } else {
+          return getGoal(nextWikiLink, distance - 1, history, cb);
+        }
+      } catch (e) {
+        console.log(e);
+        console.log(history);
+        getGoal(tempHistory[tempHistory.length - 1], distance + 1, tempHistory.slice(0, tempHistory.length - 1), cb);
       }
     } else {
       return getGoal(history[history.length - 1], distance + 1, history.slice(0, history.length - 1), cb);
@@ -46,4 +53,4 @@ const generateRandom = (par, cb) => {
   return getGoal('https://en.wikipedia.org/wiki/Special:Random', par, [], cb);
 };
 
-generateRandom(10, (link, history) => { console.log(link); console.log(history); });
+generateRandom(15, (link, history) => { console.log(link); console.log(history); });
