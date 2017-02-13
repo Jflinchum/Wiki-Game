@@ -11,7 +11,7 @@ const getLinks = (body) => {
   const regex = /<a href="\/wiki\/(.+)(" title)(.+)?">/gi;
   const matches = [];
   let match = [];
-  while ((match = regex.exec(body)) != null) {
+  while ((match = regex.exec(body)) != null) { // eslint-disable-line
     if (!match[1].includes(':')) {
       matches.push(match[0]);
     }
@@ -29,19 +29,26 @@ const getGoal = (url, distance, history, cb) => {
         const nextLink = links[Math.floor(Math.random() * (links.length + 1))];
         const regex = /\/wiki\/.+?(?=")/;
         const nextWikiLink = `https://en.wikipedia.org${regex.exec(nextLink)}`;
-        history.push({title, link: (response.request.uri.href)});
+        history.push({ title, link: (response.request.uri.href) });
         if (distance <= 0) {
-          return cb({title, link: (response.request.uri.href)}, history);
-        } else {
-          return getGoal(nextWikiLink, distance - 1, history, cb);
+          return cb({ title, link: (response.request.uri.href) }, history);
         }
+        return getGoal(nextWikiLink, distance - 1, history, cb);
       } catch (e) {
         console.log(e);
         console.log(history);
-        getGoal(tempHistory[tempHistory.length - 1], distance + 1, tempHistory.slice(0, tempHistory.length - 1), cb);
+        getGoal(
+          tempHistory[tempHistory.length - 1],
+          distance + 1,
+          tempHistory.slice(0, tempHistory.length - 1),
+          cb);
       }
     } else {
-      return getGoal(history[history.length - 1], distance + 1, history.slice(0, history.length - 1), cb);
+      return getGoal(
+        history[history.length - 1],
+        distance + 1,
+        history.slice(0, history.length - 1),
+        cb);
     }
   });
 };
@@ -49,8 +56,6 @@ const getGoal = (url, distance, history, cb) => {
 /**
  * Takes a par and callback to generate a random link and a goal
  */
-const generateRandom = (par, cb) => {
-  return getGoal('https://en.wikipedia.org/wiki/Special:Random', par, [], cb);
-};
+const generateRandom = (par, cb) => getGoal('https://en.wikipedia.org/wiki/Special:Random', par, [], cb);
 
 generateRandom(15, (link, history) => { console.log(link); console.log(history); });

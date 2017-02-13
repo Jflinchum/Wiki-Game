@@ -1,8 +1,8 @@
 {
-  "name": "electron-react-boilerplate",
-  "productName": "ElectronReact",
-  "version": "0.10.0",
-  "description": "Electron application boilerplate based on React, React Router, Webpack, React Hot Loader for rapid application development",
+  "name": "wiki-game",
+  "productName": "WikiGame",
+  "version": "0.0.1",
+  "description": "A wiki game where you try to go from one topic to another in the least amount of clicks",
   "main": "main.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --retries 2 --compilers js:babel-register --recursive --require ./test/setup.js test/**/*.spec.js",
@@ -16,6 +16,7 @@
     "build-renderer": "cross-env NODE_ENV=production node -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.production.js --progress --profile --colors",
     "build": "npm run build-main && npm run build-renderer",
     "start": "cross-env NODE_ENV=production electron ./app/",
+    "util-start": "cross-env NODE_ENV=development babel-node app/utils/generate.js",
     "flow": "flow",
     "flow-typed": "flow-typed install",
     "start-hot": "cross-env HOT=1 NODE_ENV=development electron -r babel-register -r babel-polyfill ./app/main.development",
@@ -27,7 +28,6 @@
     "package-all": "npm run build && build -mwl",
     "cleanup": "mop -v"
   },
-  "browserslist": "electron 1.4",
   "build": {
     "productName": "ElectronReact",
     "appId": "org.develar.ElectronReact",
@@ -74,27 +74,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chentsulin/electron-react-boilerplate.git"
+    "url": "git+https://github.com/Jflinchum/Wiki-Game.git"
   },
-  "author": {
-    "name": "C. T. Lin",
-    "email": "chentsulin@gmail.com",
-    "url": "https://github.com/chentsulin"
-  },
+  "author": "Jonathan Flinchum",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chentsulin/electron-react-boilerplate/issues"
+    "url": "https://github.com/Jflinchum/Wiki-Game/issues"
   },
-  "keywords": [
-    "electron",
-    "boilerplate",
-    "react",
-    "react-router",
-    "flux",
-    "webpack",
-    "react-hot"
-  ],
-  "homepage": "https://github.com/chentsulin/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/Jflinchum/Wiki-Game#readme",
   "devDependencies": {
     "asar": "^0.13.0",
     "babel-core": "^6.22.1",
