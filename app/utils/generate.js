@@ -30,7 +30,7 @@ const getGoal = (url, distance, history, cb) => {
       try {
         const title = getTitle(body);
         const links = getLinks(body);
-        const nextLink = links[Math.floor(Math.random() * (links.length + 1))];
+        const nextLink = links[Math.floor(Math.random() * (links.length - 1))];
         history.push({ title, link: (response.request.uri.href) });
         if (distance <= 0) {
           return cb(history);
@@ -39,15 +39,15 @@ const getGoal = (url, distance, history, cb) => {
       } catch (e) {
         console.log(e);
         console.log(history);
-        getGoal(
-          tempHistory[tempHistory.length - 1],
+        return getGoal(
+          tempHistory[tempHistory.length - 2],
           distance + 1,
           tempHistory.slice(0, tempHistory.length - 1),
           cb);
       }
     } else {
       return getGoal(
-        history[history.length - 1],
+        history[history.length - 2],
         distance + 1,
         history.slice(0, history.length - 1),
         cb);
