@@ -1,34 +1,43 @@
 {
   "parser": "babel-eslint",
-  "extends": ["standard", "plugin:react/recommended"],
-  "globals": {
-    "__DEV__": true
-  },
+  "extends": "airbnb",
   "env": {
     "browser": true,
-    "jest": true
+    "mocha": true,
+    "node": true
   },
   "rules": {
-    "arrow-parens": 0,
-    "semi": [2, "always"],
-    "prefer-const": 2,
-    "no-multiple-empty-lines": 0,
-    "space-before-function-paren": 0,
-    "generator-star-spacing": 0,
-    "no-unsafe-finally": 0,
-    "no-useless-computed-key": 0,
-    "react/jsx-uses-react": "error",
-    "react/jsx-uses-vars": "error"
-  },
-  "parserOptions": {
-    "ecmaVersion": 6,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "experimentalObjectRestSpread": true,
-      "jsx": true
-    }
+    "arrow-parens": ["off"],
+    "compat/compat": 2,
+    "consistent-return": "off",
+    "comma-dangle": "off",
+    "generator-star-spacing": "off",
+    "import/no-unresolved": ["error", { "ignore": ["electron"] }],
+    "import/no-extraneous-dependencies": "off",
+    "no-console": 0,
+    "no-use-before-define": "off",
+    "promise/param-names": 2,
+    "promise/always-return": 2,
+    "promise/catch-or-return": 2,
+    "promise/no-native": 0,
+    "react/jsx-no-bind": "off",
+    "react/jsx-filename-extension": ["error", { "extensions": [".js", ".jsx"] }],
+    "react/prefer-stateless-function": "off",
+    "flowtype-errors/show-errors": 2
   },
   "plugins": [
+    "flowtype",
+    "flowtype-errors",
+    "import",
+    "promise",
+    "compat",
     "react"
-  ]
+  ],
+  "settings": {
+    "import/resolver": {
+      "webpack": {
+        "config": "webpack.config.eslint.js"
+      }
+    }
+  }
 }
