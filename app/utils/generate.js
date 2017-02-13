@@ -4,20 +4,24 @@ import request from 'request';
 const getTitle = (body) => {
   const title = body.match(/<title>(.+)<\/title>/i)[1];
   return title;
-  // return title.substring(7, title.length - 8);
 };
 
 const getLinks = (body) => {
-  const regex = /<a href="\/wiki\/(.+)(" title)(.+)?">/gi;
+  const htmlRegex = /<a href="\/wiki\/.+?" title.+?">/gi;
+  const linkRegex = /\/wiki\/.+?(?=")/;
   const matches = [];
   let match = [];
-  while ((match = regex.exec(body)) != null) { // eslint-disable-line
-    if (!match[1].includes(':')) {
-      matches.push(match[0]);
+  while ((match = htmlRegex.exec(body)) != null) { // eslint-disable-line
+    if (!match[0].includes(':') && !match[0].includes('Main_Page')) { // If it is a special kind of link or the main page for Wikipedia
+      matches.push(`https://en.wikipedia.org${linkRegex.exec(match[0])}`);
     }
   }
   return matches;
 };
+
+// request('https://en.wikipedia.org/wiki/Clivina_okutanii', (error, response, body) => {
+//   console.log(getLinks(body));
+// });
 
 const getGoal = (url, distance, history, cb) => {
   request(url, (error, response, body) => {
@@ -27,13 +31,11 @@ const getGoal = (url, distance, history, cb) => {
         const title = getTitle(body);
         const links = getLinks(body);
         const nextLink = links[Math.floor(Math.random() * (links.length + 1))];
-        const regex = /\/wiki\/.+?(?=")/;
-        const nextWikiLink = `https://en.wikipedia.org${regex.exec(nextLink)}`;
         history.push({ title, link: (response.request.uri.href) });
         if (distance <= 0) {
-          return cb({ title, link: (response.request.uri.href) }, history);
+          return cb(history);
         }
-        return getGoal(nextWikiLink, distance - 1, history, cb);
+        return getGoal(nextLink, distance - 1, history, cb);
       } catch (e) {
         console.log(e);
         console.log(history);
@@ -53,9 +55,13 @@ const getGoal = (url, distance, history, cb) => {
   });
 };
 
+const generateRandom = (par, cb) => getGoal('https://en.wikipedia.org/wiki/Special:Random', par, [], cb);
+
 /**
  * Takes a par and callback to generate a random link and a goal
  */
-const generateRandom = (par, cb) => getGoal('https://en.wikipedia.org/wiki/Special:Random', par, [], cb);
+export default {
+  generateRandom
+};
 
-generateRandom(15, (link, history) => { console.log(link); console.log(history); });
+// generateRandom(15, (history) => { console.log(history); });
