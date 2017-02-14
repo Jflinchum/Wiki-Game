@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router';
 import { Form, Col, Row, FormControl, ControlLabel, Button } from 'react-bootstrap';
 import classNames from 'classnames';
 import styles from './Home.css';
-import { generateRandom } from '../utils/generate';
+import { generate } from '../utils/generate';
 
 
 export default class Home extends Component {
@@ -28,7 +27,14 @@ export default class Home extends Component {
   refresh() {
     const par = Math.floor((Math.random() *
     (this.state.maxPar - this.state.minPar)) + this.state.minPar);
-    generateRandom(par, (history) => {
+    generate({
+      initArticle: this.state.initArt,
+      goalArticle: this.state.goalArt,
+      par
+    }, (err, history) => {
+      if (err) {
+        console.log(err);
+      }
       console.log(history);
       this.setState({ history, clicks: null });
     });
@@ -43,7 +49,8 @@ export default class Home extends Component {
               this.state.history.length > 0
               ? <h4>Get from {` ${this.state.history[0].title} `}
                 to {` ${this.state.history[this.state.history.length - 1].title} `} with a
-                par of {` ${this.state.history.length - 1}.`} Current clicks: {` ${this.state.clicks ? this.state.clicks : 0}.`}</h4>
+                par of {` ${this.state.history.length - 1}.`} Current clicks:
+                {` ${this.state.clicks ? this.state.clicks : 0}.`}</h4>
               : null
             }
           </Row>
@@ -52,23 +59,58 @@ export default class Home extends Component {
               <Col componentClass={ControlLabel} xs={2}>
                 Initial Article
               </Col>
-              <Col xs={3}>
-                <FormControl type="text" placeholder={this.state.history[0] ? this.state.history[0].link : ''} onChange={(event) => { this.setState({ initArt: event.target.value }); }} />
+              <Col xs={6}>
+                <FormControl
+                  type="text"
+                  placeholder={this.state.history[0] ?
+                    this.state.history[0].link :
+                    ''}
+                  onChange={(event) => { this.setState({ initArt: event.target.value }); }}
+                />
               </Col>
+            </Row>
+            <Row className={classNames(styles.row, styles.options)}>
+              <Col componentClass={ControlLabel} xs={2}>
+                Goal Article
+              </Col>
+              <Col xs={6}>
+                <FormControl
+                  type="text"
+                  placeholder={this.state.history[this.state.history.length - 1] ?
+                    this.state.history[this.state.history.length - 1].link :
+                    ''}
+                  onChange={(event) => { this.setState({ goalArt: event.target.value }); }}
+                />
+              </Col>
+            </Row>
+            <Row className={classNames(styles.row, styles.options)}>
               <Col componentClass={ControlLabel} xs={2}>
                 Minimum Par
               </Col>
-              <Col xs={3}>
-                <FormControl type="text" placeholder={this.state.minPar ? this.state.minPar : ''} onChange={(event) => { this.setState({ minPar: event.target.value }); }} />
+              <Col xs={2}>
+                <FormControl
+                  type="text"
+                  placeholder={this.state.minPar ? this.state.minPar : ''}
+                  onChange={(event) => { this.setState({ minPar: event.target.value }); }}
+                />
               </Col>
               <Col componentClass={ControlLabel} xs={2}>
                 Maximum Par
               </Col>
-              <Col xs={3}>
-                <FormControl type="text" placeholder={this.state.maxPar ? this.state.maxPar : ''} onChange={(event) => { this.setState({ maxPar: event.target.value }); }} />
+              <Col xs={2}>
+                <FormControl
+                  type="text"
+                  placeholder={this.state.maxPar ? this.state.maxPar : ''}
+                  onChange={(event) => { this.setState({ maxPar: event.target.value }); }}
+                />
               </Col>
               <Col xs={2}>
-                <Button bsStyle="default" onClick={() => { this.refresh(); }}>Refresh</Button>
+                <Button
+                  bsStyle="default"
+                  onClick={(e) => { e.preventDefault(); this.refresh(); }}
+                >
+                  Refresh
+                </Button>
               </Col>
             </Row>
           </Form>

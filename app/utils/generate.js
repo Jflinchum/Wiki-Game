@@ -23,7 +23,7 @@ const getLinks = (body) => {
 //   console.log(getLinks(body));
 // });
 
-const getGoal = (url, distance, history, cb) => {
+const getPath = (url, distance, history, cb) => {
   request(url, (error, response, body) => {
     if (!error && response.statusCode === 200) {
       const tempHistory = history;
@@ -33,35 +33,55 @@ const getGoal = (url, distance, history, cb) => {
         const nextLink = links[Math.floor(Math.random() * (links.length - 1))];
         history.push({ title, link: (response.request.uri.href) });
         if (distance <= 0) {
-          return cb(history);
+          return cb(null, history);
         }
-        return getGoal(nextLink, distance - 1, history, cb);
+        return getPath(nextLink, distance - 1, history, cb);
       } catch (e) {
         console.log(e);
         console.log(history);
-        return getGoal(
+        return getPath(
           tempHistory[tempHistory.length - 2],
           distance + 1,
           tempHistory.slice(0, tempHistory.length - 1),
           cb);
       }
-    } else {
-      return getGoal(
+    } else if (history.length === 0) {
+      return getPath(
         history[history.length - 2],
         distance + 1,
         history.slice(0, history.length - 1),
         cb);
+    } else {
+      return cb(new Error('Error getting wiki page.'));
     }
   });
 };
 
-const generateRandom = (par, cb) => getGoal('https://en.wikipedia.org/wiki/Special:Random', par, [], cb);
+const generate = ({ initArticle, goalArticle, par }, cb) => {
+  if (initArticle && !goalArticle) {
+    const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/g;
+    if (initArticle.match(urlRegex)) { // If the initArticle is a url
+      getPath(initArticle, par, [], cb);
+    } else { // If it isn't a url
+      return cb(new Error('Invalid wiki url'));
+    }
+  } else if (goalArticle && !initArticle) {
+    getPath(goalArticle, par, [], (error, history) => {
+      if (error) {
+        return cb(error);
+      }
+      return cb(null, history.reverse());
+    });
+  } else {
+    getPath('https://en.wikipedia.org/wiki/Special:Random', par, [], cb);
+  }
+};
 
 /**
  * Takes a par and callback to generate a random link and a goal
  */
 export default {
-  generateRandom
+  generate
 };
 
 // generateRandom(15, (history) => { console.log(history); });
