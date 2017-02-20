@@ -6,7 +6,7 @@ const getTitle = (body) => {
   return title;
 };
 
-const getLinks = (body) => {
+const getWikiLinks = (body) => {
   const htmlRegex = /<a href="\/wiki\/.+?" title.+?">/gi;
   const linkRegex = /\/wiki\/.+?(?=")/;
   const matches = [];
@@ -19,6 +19,15 @@ const getLinks = (body) => {
   return matches;
 };
 
+const getLinksToPath = (title, cb) => {
+  request(`https://en.wikipedia.org/w/index.php?title=Special%3AWhatLinksHere&limit=500&target=${title}&namespace=0`, (error, response, body) => {
+    if (error) {
+      return cb(error);
+    }
+    return cb(null, getWikiLinks(body).filter((url) => !url.includes(title)));
+  });
+};
+
 class Path {
   constructor(path) {
     this.path = path;
@@ -28,7 +37,7 @@ class Path {
     return new Promise((resolve, reject) => {
       request(this.path[this.path.length - 1], (error, response, body) => {
         if (!error && response.statusCode === 200) {
-          const links = getLinks(body);
+          const links = getWikiLinks(body);
           const newPaths = [];
           links.forEach((link) => {
             if (!this.path.includes(link)) {
@@ -87,30 +96,65 @@ const getPath = async (url1, url2, cb) => {
   }
 };
 
-const getRandomPath = (url, distance, history, cb) => {
+const getRandomPathTo = (url, distance, history, cb) => {
+  const tempHistory = history;
+  if (distance <= 0) {
+    return cb(null, history);
+  }
+  try {
+    const linkRegex = /(\/wiki\/)(.*)/gi;
+    const linkTitle = linkRegex.exec(url)[2];
+    getLinksToPath(linkTitle, (err, links) => {
+      const nextLink = links[Math.floor(Math.random() * (links.length - 1))];
+      request(url, (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+          history.unshift({ title: getTitle(body), link: url });
+          return getRandomPathTo(nextLink, distance - 1, history, cb);
+        } else if (history.length === 0) {
+          return getRandomPathTo(
+            history[history.length - 2],
+            distance + 1,
+            history.slice(0, history.length - 1),
+            cb);
+        }
+        return cb(new Error('Error getting wiki page.'));
+      });
+    });
+  } catch (e) {
+    console.log(e);
+    console.log(history);
+    return getRandomPathTo(
+      tempHistory[tempHistory.length - 2],
+      distance + 1,
+      tempHistory.slice(0, tempHistory.length - 1),
+      cb);
+  }
+};
+
+const getRandomPathFrom = (url, distance, history, cb) => {
   request(url, (error, response, body) => {
     if (!error && response.statusCode === 200) {
       const tempHistory = history;
       try {
         const title = getTitle(body);
-        const links = getLinks(body);
+        const links = getWikiLinks(body);
         const nextLink = links[Math.floor(Math.random() * (links.length - 1))];
         history.push({ title, link: (response.request.uri.href) });
         if (distance <= 0) {
           return cb(null, history);
         }
-        return getRandomPath(nextLink, distance - 1, history, cb);
+        return getRandomPathFrom(nextLink, distance - 1, history, cb);
       } catch (e) {
         console.log(e);
         console.log(history);
-        return getRandomPath(
+        return getRandomPathFrom(
           tempHistory[tempHistory.length - 2],
           distance + 1,
           tempHistory.slice(0, tempHistory.length - 1),
           cb);
       }
     } else if (history.length === 0) {
-      return getRandomPath(
+      return getRandomPathFrom(
         history[history.length - 2],
         distance + 1,
         history.slice(0, history.length - 1),
@@ -125,21 +169,21 @@ const generate = ({ initArticle, goalArticle, par }, cb) => {
   if (initArticle && !goalArticle) {
     const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/g;
     if (initArticle.match(urlRegex)) { // If the initArticle is a url
-      getRandomPath(initArticle, par, [], cb);
+      getRandomPathFrom(initArticle, par, [], cb);
     } else { // If it isn't a url
       return cb(new Error('Invalid wiki url'));
     }
-  } else if (goalArticle && !initArticle) {
-    getRandomPath(goalArticle, par, [], (error, history) => {
+  } else if (!initArticle && goalArticle) {
+    getRandomPathTo(goalArticle, par, [], (error, history) => {
       if (error) {
         return cb(error);
       }
-      return cb(null, history.reverse());
+      return cb(null, history);
     });
   } else if (initArticle && goalArticle) {
     getPath(initArticle, goalArticle, cb);
   } else {
-    getRandomPath('https://en.wikipedia.org/wiki/Special:Random', par, [], cb);
+    getRandomPathFrom('https://en.wikipedia.org/wiki/Special:Random', par, [], cb);
   }
 };
 
