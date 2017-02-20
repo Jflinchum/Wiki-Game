@@ -16,6 +16,7 @@ export default class Home extends Component {
       clicks: null,
       initArt: '',
       goalArt: '',
+      loading: true
     };
     this.refresh = this.refresh.bind(this);
   }
@@ -25,6 +26,7 @@ export default class Home extends Component {
   }
 
   refresh() {
+    this.setState({ loading: true });
     const par = Math.floor((Math.random() *
     (this.state.maxPar - this.state.minPar)) + this.state.minPar);
     generate({
@@ -36,7 +38,8 @@ export default class Home extends Component {
         console.log(err);
       }
       console.log(history);
-      this.setState({ history, clicks: null });
+      this.setState({ history, clicks: null, loading: false });
+      this.forceUpdate();
     });
   }
 
@@ -47,12 +50,12 @@ export default class Home extends Component {
           <div className={styles.ui}>
             <Row className={classNames(styles.row)}>
               {
-                this.state.history.length > 0
+                !this.state.loading
                 ? <h4>Get from {` ${this.state.history[0].title} `}
                   to {` ${this.state.history[this.state.history.length - 1].title} `} with a
                   par of {` ${this.state.history.length - 1}.`} Current clicks:
                   {` ${this.state.clicks ? this.state.clicks : 0}.`}</h4>
-                : null
+                : <h4>Loading...</h4>
               }
             </Row>
             <Form inline>
@@ -125,7 +128,7 @@ export default class Home extends Component {
             </Form>
           </div>
           <div className={styles.wiki}>
-            {this.state.history[0] ?
+            {!this.state.loading ?
               <object
                 type="text/html" data={this.state.history[0].link} width="100%" height="600px"
                 onLoad={() => {
@@ -136,7 +139,7 @@ export default class Home extends Component {
                   }
                 }}
               />
-              : null}
+              : <img className={styles.loading} src="./public/ripple.svg" alt="Loading..." />}
           </div>
         </div>
       </div>

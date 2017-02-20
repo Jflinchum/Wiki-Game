@@ -29,4 +29,11 @@ h4 {
 
 .wiki {
   padding-top: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading {
+  padding-top: 20%;
 }
