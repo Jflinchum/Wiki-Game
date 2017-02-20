@@ -2,7 +2,12 @@
 import request from 'request';
 
 const getTitle = (body) => {
-  const title = body.match(/<title>(.+) - Wikipedia<\/title>/i)[1];
+  let title = body.match(/<title>(.+) - Wikipedia<\/title>/i)[1];
+  const parser = new DOMParser();
+  const dom = parser.parseFromString(
+    `<!doctype html><body>${title}`,
+    'text/html');
+  title = dom.body.textContent;
   return title;
 };
 
