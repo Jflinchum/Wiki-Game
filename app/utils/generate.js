@@ -19,31 +19,6 @@ const getLinks = (body) => {
   return matches;
 };
 
-// const getPath = (url, goalUrl, cb) => {
-//   let searchDone = false;
-//   const findPath = (url1, url2, path, callback) => {
-//     if (searchDone) {
-//       return;
-//     }
-//     path.push(url1);
-//     if (url1 === goalUrl) {
-//       return callback(null, path);
-//     }
-//     request(url1, (error, response, body) => {
-//       if (!error && response.statusCode === 200) {
-//         const links = getLinks(body);
-//         links.forEach((link) => { findPath(link, goalUrl, path, callback); });
-//       } else {
-//         return callback(new Error('Error getting wiki page.'));
-//       }
-//     });
-//   };
-//   findPath(url, goalUrl, [], (error, path) => {
-//     searchDone = true;
-//     return cb(error, path);
-//   });
-// };
-
 class Path {
   constructor(path) {
     this.path = path;
@@ -68,22 +43,22 @@ class Path {
   }
 }
 
-const turnPathToLink = (path) => {
-  return new Promise((resolve, reject) => {
+const turnPathToLink = (path) => (
+  new Promise((resolve, reject) => {
     request(path, (error, response, body) => {
       if (error) {
         return reject(error);
       }
       return resolve({ title: getTitle(body), link: path });
     });
-  });
-};
+  })
+);
 
 const getPath = async (url1, url2, cb) => {
   const paths = [];
   paths.push(new Path([url1]));
   try {
-    while (true) {
+    while (true) { // eslint-disable-line
       let potentialPath =
       paths.filter((finalPath) => (finalPath.path.includes(url2)));
       if (potentialPath.length > 0) {
@@ -96,13 +71,13 @@ const getPath = async (url1, url2, cb) => {
             return cb(e);
           }
         });
-        return cb(null, await Promise.all(finalPath));
+        return cb(null, await Promise.all(finalPath)); // eslint-disable-line
       }
       const generateFunctions = [];
       while (paths.length > 0) {
         generateFunctions.push(paths.pop().generate());
       }
-      const results = await Promise.all(generateFunctions);
+      const results = await Promise.all(generateFunctions); //eslint-disable-line
       results.forEach((path) => {
         paths.push(...path);
       });
@@ -111,16 +86,6 @@ const getPath = async (url1, url2, cb) => {
     return cb(e);
   }
 };
-
-// getPath(
-// 'https://en.wikipedia.org/wiki/Overwatch_(video_game)',
-// 'https://en.wikipedia.org/wiki/Undertale',
-// (error, path) => {
-//   if (error) {
-//     console.log(error);
-//   }
-//   console.log(path, 'final path');
-// });
 
 const getRandomPath = (url, distance, history, cb) => {
   request(url, (error, response, body) => {
