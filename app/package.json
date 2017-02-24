@@ -1,14 +1,10 @@
 {
-  "name": "electron-react-boilerplate",
-  "productName": "electron-react-boilerplate",
+  "name": "wiki-game",
+  "productName": "WikiGame",
   "version": "1.0.0",
-  "description": "Electron application boilerplate based on React, React Router, Webpack, React Hot Loader for rapid application development",
+  "description": "A wiki game where you try to go from one topic to another in the least amount of clicks",
   "main": "./main.js",
-  "author": {
-    "name": "C. T. Lin",
-    "email": "chentsulin@gmail.com",
-    "url": "https://github.com/chentsulin"
-  },
+  "author": "Jonathan Flinchum",
   "license": "MIT",
   "dependencies": {
   }
