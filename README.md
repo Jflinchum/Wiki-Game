@@ -10,5 +10,5 @@ You can also input two articles, which will generate the shortest path between t
 ## Usage
 
 Once you clone the repository, run `npm install` to install all of the dependencies.
-`npm run build` builds the application and 'npm run start` starts it.
+`npm run build` builds the application and `npm run start` starts it.
 
